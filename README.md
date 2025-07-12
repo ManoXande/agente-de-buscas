@@ -24,7 +24,7 @@ Um sistema de busca inteligente que integra múltiplos servidores MCP (Model Con
 
 ```bash
 # Clone o repositório
-git clone <repo-url>
+git clone https://github.com/ManoXande/agente-de-buscas.git
 cd agente-de-buscas
 
 # Instale as dependências
