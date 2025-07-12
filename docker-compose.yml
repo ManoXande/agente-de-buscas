@@ -1,0 +1,65 @@
+version: '3.8'
+
+services:
+  agente-buscas:
+    build: .
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+      - ./backups:/app/backups
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=production
+      - DATABASE_PATH=/app/data/search.db
+    restart: unless-stopped
+    depends_on:
+      - redis
+    networks:
+      - agente-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    networks:
+      - agente-network
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./ssl:/etc/nginx/ssl
+    depends_on:
+      - agente-buscas
+    restart: unless-stopped
+    networks:
+      - agente-network
+
+volumes:
+  redis_data:
+    driver: local
+
+networks:
+  agente-network:
+    driver: bridge 

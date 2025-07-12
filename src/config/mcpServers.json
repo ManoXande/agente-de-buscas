@@ -1,0 +1,190 @@
+{
+  "servers": [
+    {
+      "name": "github",
+      "type": "github",
+      "enabled": true,
+      "description": "Busca em repositórios GitHub",
+      "url": "mcp://github-server",
+      "config": {
+        "token": "process.env.GITHUB_TOKEN",
+        "maxResults": 10,
+        "timeout": 30000
+      },
+      "capabilities": [
+        "search_repositories",
+        "search_code",
+        "get_file_content",
+        "list_issues",
+        "search_issues"
+      ]
+    },
+    {
+      "name": "firecrawl",
+      "type": "web",
+      "enabled": true,
+      "description": "Web scraping com Firecrawl",
+      "url": "mcp://firecrawl-server",
+      "config": {
+        "apiKey": "process.env.FIRECRAWL_API_KEY",
+        "maxPages": 5,
+        "timeout": 60000,
+        "formats": ["markdown", "html"]
+      },
+      "capabilities": [
+        "scrape_url",
+        "crawl_website",
+        "extract_content",
+        "get_links"
+      ]
+    },
+    {
+      "name": "filesystem",
+      "type": "files",
+      "enabled": true,
+      "description": "Busca em arquivos locais",
+      "url": "mcp://filesystem-server",
+      "config": {
+        "rootPath": "./",
+        "maxDepth": 5,
+        "allowedExtensions": [".js", ".ts", ".jsx", ".tsx", ".json", ".md", ".txt", ".py", ".html", ".css"],
+        "excludePatterns": ["node_modules", ".git", "dist", "build"]
+      },
+      "capabilities": [
+        "read_file",
+        "list_files",
+        "search_files",
+        "get_file_stats"
+      ]
+    },
+    {
+      "name": "context7",
+      "type": "documentation",
+      "enabled": true,
+      "description": "Busca em documentação técnica",
+      "url": "mcp://context7-server",
+      "config": {
+        "apiKey": "process.env.CONTEXT7_API_KEY",
+        "sources": ["mdn", "nodejs", "react", "vue", "angular"],
+        "maxResults": 10
+      },
+      "capabilities": [
+        "search_docs",
+        "get_doc_content",
+        "list_categories",
+        "get_examples"
+      ]
+    },
+    {
+      "name": "sqlite",
+      "type": "database",
+      "enabled": true,
+      "description": "Busca em banco de dados SQLite",
+      "url": "mcp://sqlite-server",
+      "config": {
+        "databasePath": "./data/search.db",
+        "readOnly": true,
+        "maxResults": 100
+      },
+      "capabilities": [
+        "execute_query",
+        "list_tables",
+        "describe_table",
+        "get_schema"
+      ]
+    },
+    {
+      "name": "puppeteer",
+      "type": "web",
+      "enabled": true,
+      "description": "Web scraping com Puppeteer (fallback)",
+      "url": "mcp://puppeteer-server",
+      "config": {
+        "headless": true,
+        "timeout": 30000,
+        "userAgent": "Mozilla/5.0 (compatible; SearchBot/1.0)",
+        "viewport": {
+          "width": 1920,
+          "height": 1080
+        }
+      },
+      "capabilities": [
+        "scrape_page",
+        "take_screenshot",
+        "get_page_info",
+        "extract_text"
+      ]
+    },
+    {
+      "name": "memory",
+      "type": "knowledge",
+      "enabled": true,
+      "description": "Sistema de memória e conhecimento",
+      "url": "mcp://memory-server",
+      "config": {
+        "maxMemories": 1000,
+        "embeddings": true,
+        "similarity": "cosine"
+      },
+      "capabilities": [
+        "store_memory",
+        "recall_memory",
+        "search_memories",
+        "update_memory"
+      ]
+    },
+    {
+      "name": "anthropic",
+      "type": "llm",
+      "enabled": true,
+      "description": "Claude API para processamento de linguagem",
+      "url": "mcp://anthropic-server",
+      "config": {
+        "apiKey": "process.env.ANTHROPIC_API_KEY",
+        "model": "claude-3-sonnet-20240229",
+        "maxTokens": 4096,
+        "temperature": 0.7
+      },
+      "capabilities": [
+        "complete_text",
+        "analyze_content",
+        "summarize_text",
+        "extract_entities"
+      ]
+    }
+  ],
+  "settings": {
+    "connectionTimeout": 10000,
+    "requestTimeout": 30000,
+    "retryAttempts": 3,
+    "retryDelay": 1000,
+    "maxConcurrentConnections": 10,
+    "enableLogging": true,
+    "logLevel": "info",
+    "healthCheckInterval": 60000,
+    "autoReconnect": true,
+    "reconnectDelay": 5000,
+    "maxReconnectAttempts": 5
+  },
+  "routing": {
+    "web": ["firecrawl", "puppeteer"],
+    "code": ["github", "filesystem"],
+    "docs": ["context7", "github"],
+    "data": ["sqlite", "memory"],
+    "ai": ["anthropic"]
+  },
+  "fallbacks": {
+    "web": {
+      "primary": "firecrawl",
+      "secondary": "puppeteer"
+    },
+    "code": {
+      "primary": "github",
+      "secondary": "filesystem"
+    },
+    "docs": {
+      "primary": "context7",
+      "secondary": "github"
+    }
+  }
+} 
